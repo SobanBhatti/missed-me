@@ -127,3 +127,5 @@ il2cppOutput/
 
 *.DotSettings.user
 .vsconfig
+*.sln
+*.slnx
