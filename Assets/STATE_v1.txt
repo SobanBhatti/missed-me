@@ -1,0 +1,15 @@
+﻿Current project state:
+
+GameState system implemented:
+- Persistent Bootstrap scene
+- GameStateController singleton (DontDestroyOnLoad)
+- Centralized scene transitions
+- SceneNames constants (no magic strings)
+- Scene self-registration (MainMenu, Lobby, Gameplay)
+- UI calls GameStateController only
+
+Flow:
+Boot → MainMenu → Lobby → LoadingGame → Gameplay
+
+Scene loading currently single-mode.
+No additive system yet.

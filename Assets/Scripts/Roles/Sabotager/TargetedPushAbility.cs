@@ -1,0 +1,50 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class TargetedPushAbility : MonoBehaviour
+{
+    public float range = 40f;
+    public float pushForce = 16f;
+    public float upwardForce = 4f;
+    public float cooldown = 2f;
+    public LayerMask runnerLayer;
+
+    private float _lastUseTime;
+    private Camera _camera;
+
+    void Awake()
+    {
+        _camera = GetComponentInChildren<Camera>();
+    }
+
+    void Update()
+    {
+        if (Keyboard.current.qKey.wasPressedThisFrame && Time.time > _lastUseTime + cooldown)
+        {
+            TryPush();
+            _lastUseTime = Time.time;
+        }
+    }
+
+    void TryPush()
+    {
+        Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.SphereCast(ray, 0.75f, out hit, range, runnerLayer))
+        {
+            KnockbackReceiver receiver = hit.collider.GetComponentInParent<KnockbackReceiver>();
+
+            if (receiver != null)
+            {
+                Vector3 direction = receiver.transform.position - _camera.transform.position;
+                direction.y = 0f;
+                direction.Normalize();
+
+                Vector3 force = direction * pushForce + Vector3.up * upwardForce;
+
+                receiver.ApplyKnockback(force);
+            }
+        }
+    }
+}
