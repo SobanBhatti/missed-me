@@ -126,3 +126,4 @@ il2cppOutput/
 ########################################
 
 *.DotSettings.user
+.vsconfig
