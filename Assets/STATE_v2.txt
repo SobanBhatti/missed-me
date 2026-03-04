@@ -1,0 +1,355 @@
+﻿STATE_v2
+
+Current project state
+
+
+CORE ARCHITECTURE
+
+GameState system implemented
+
+- Persistent Bootstrap scene
+- GameStateController singleton (DontDestroyOnLoad)
+- Centralized scene transitions
+- SceneNames constants (no magic strings)
+- Scene self-registration (MainMenu, Lobby, Gameplay)
+- UI communicates only with GameStateController
+
+Scene flow
+
+Boot -> MainMenu -> Lobby -> LoadingGame -> Gameplay
+
+Scene loading mode
+
+- Single scene loading
+- No additive scene system implemented
+
+
+
+MULTIPLAYER ARCHITECTURE
+
+Networking stack implemented with
+
+- Netcode for GameObjects
+- Unity Transport
+- Unity Relay
+- Unity Lobby
+- Unity Authentication
+
+Network topology
+
+Client -> Relay -> Host
+
+- Host acts as server (Client-Server model)
+
+
+
+NETWORK INITIALIZATION
+
+Networking services initialized by
+
+UGSBootstrap
+
+Responsibilities
+
+- Initialize Unity Gaming Services
+- Perform anonymous authentication
+- Ensure services are ready before lobby operations
+
+Services initialized
+
+- Authentication
+- Lobby
+- Relay
+
+
+
+LOBBY SYSTEM
+
+Lobby creation and joining handled by
+
+RelayLobbyNetwork
+
+Host flow
+
+HostAsync()
+- Create Lobby
+- Create Relay Allocation
+- Generate Relay Join Code
+- Store Join Code in Lobby data
+- Configure Unity Transport
+- StartHost()
+
+Client flow
+
+JoinAsync(lobbyId)
+- Join Lobby
+- Read Relay Join Code from Lobby data
+- Join Relay Allocation
+- Configure Unity Transport
+- StartClient()
+
+Lobby data
+
+- RelayJoinCode
+
+Lobby capacity
+
+- Up to 8 players
+
+
+
+UI NETWORKING LAYER
+
+Main menu networking UI handled by
+
+LobbyNetworkDebugUI
+
+Responsibilities
+
+- Host button -> HostAsync()
+- Join button -> JoinAsync(lobbyId)
+
+After successful connection
+
+GameStateController.SetState(GameStateType.Lobby)
+
+Flow
+
+MainMenu -> Host / Join -> Lobby
+
+
+
+LOBBY SCENE
+
+Lobby scene contains
+
+- Lobby UI
+- Start Match button
+- Lobby ID display
+
+Lobby ID display handled by
+
+LobbyLobbyIdDisplay
+
+Displays
+
+Lobby ID: <CurrentLobby.Id>
+
+Purpose
+
+- Allows clients to join without checking console logs
+
+
+
+NETWORKMANAGER SETUP
+
+NetworkManager located in
+
+Bootstrap scene
+
+Components
+
+- NetworkManager
+- UnityTransport
+- RelayLobbyNetwork
+- UGSBootstrap
+
+Configuration
+
+- Network topology: ClientServer
+- Transport: UnityTransport
+
+Default Player Prefab
+
+- None
+
+Automatic player spawning is intentionally disabled.
+
+Reason
+
+Players will be spawned manually when the Gameplay scene loads.
+
+
+
+NETWORK PLAYER PREFAB
+
+Prefab
+
+Prefabs/Network/NetworkPlayer
+
+Components
+
+- NetworkObject
+- NetworkTransform
+- NetworkPlayerOwnership
+
+Authority model
+
+- Owner authoritative movement
+
+Owner client controls
+
+- Camera
+- AudioListener
+- PlayerInput
+
+Remote players have these disabled.
+
+Handled by
+
+NetworkPlayerOwnership
+
+Responsibilities
+
+If IsOwner
+- Enable Camera
+- Enable AudioListener
+- Enable PlayerInput
+
+If not owner
+- Disable Camera
+- Disable AudioListener
+- Disable PlayerInput
+
+
+
+PLAYER CONTROLLER ARCHITECTURE
+
+Movement system uses
+
+- CharacterController
+- Starter Assets FirstPersonController
+- Cinemachine
+- New Input System
+
+Both player roles share the same base controller.
+
+
+
+GAMEPLAY ROLES
+
+Two player roles
+
+- Runner
+- Sabotager
+
+Gameplay design
+
+Runners
+- Navigate elevated obstacle course
+- Respawn on fall
+
+Sabotagers
+- Stay on ground
+- Use abilities to disrupt runners
+
+Teams switch after round timer.
+
+Game supports
+
+- Up to 4 Runners
+- Up to 4 Sabotagers
+
+
+
+KNOCKBACK SYSTEM
+
+Sabotager ability
+
+TargetedPushAbility
+
+Mechanics
+
+- Raycast or SphereCast from camera
+- LayerMask: Runner
+- Apply directional force
+
+Runner receives knockback via
+
+- KnockbackReceiver
+- KnockbackMovementAdapter
+
+Knockback integrates with CharacterController movement.
+
+
+
+RESPAWN SYSTEM
+
+Runner fall detection handled by
+
+RespawnOnFall
+
+Mechanics
+
+If player Y < killY
+- Teleport to spawnPoint
+
+CharacterController temporarily disabled during teleport.
+
+
+
+ENVIRONMENT
+
+Obstacle course implemented using
+
+- Modular segment prefabs
+- Elevated platforms
+- Balance beams
+
+Checkpoints
+
+- Not implemented
+
+Respawn
+
+- Always occurs at start platform
+
+
+
+CURRENT MULTIPLAYER STATE
+
+Working systems
+
+- Unity Gaming Services initialization
+- Authentication
+- Lobby creation
+- Lobby joining
+- Relay allocation
+- Relay connection
+- Host + Client session
+- MainMenu -> Lobby flow
+- Lobby ID display
+
+Not implemented yet
+
+- Network player spawning
+- Team assignment
+- Role switching
+- Gameplay synchronization
+- Round system
+- Score system
+
+Gameplay scene currently does not spawn network players.
+
+
+
+PLANNED NEXT SYSTEM
+
+Server gameplay bootstrap
+
+NetworkGameManager
+
+Responsibilities
+
+When Gameplay scene loads
+
+- Server spawns NetworkPlayer for each connected client
+- Assign Runner or Sabotager roles
+- Position players at spawn points
+- Enable player input and cameras
+
+Target support
+
+- Up to 8 players
+- Team switching between rounds
+- Round reset system
