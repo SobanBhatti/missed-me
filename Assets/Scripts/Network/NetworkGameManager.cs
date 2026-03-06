@@ -72,6 +72,8 @@ public class NetworkGameManager : NetworkBehaviour
             NetworkObject playerInstance = Instantiate(playerPrefab);
 
             // Ensure PlayerCapsule is at correct local position before setting world position
+            // With CharacterController center at (0, 0, 0) and height 2,
+            // PlayerCapsule must be at (0, 1, 0) to align CharacterController bottom with ground
             Transform capsule = playerInstance.transform.Find("PlayerCapsule");
             if (capsule != null)
             {

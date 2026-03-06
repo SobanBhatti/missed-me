@@ -34,6 +34,7 @@ public class PlayerMovement : NetworkBehaviour
         {
             Debug.LogError("PlayerMovement: PlayerCapsule must be a child of NetworkPlayer root!");
         }
+        
     }
 
     public override void OnNetworkSpawn()
@@ -45,9 +46,17 @@ public class PlayerMovement : NetworkBehaviour
             // Wait a frame for NetworkTransform to sync initial position
             hasSpawned = false;
             
-            // Use the prefab's expected local position (0, 1, 0) - don't read runtime value
-            // This ensures consistency regardless of NetworkTransform sync timing
+            // Use the prefab's expected local position
+            // With CharacterController center at (0, 0, 0) and height 2,
+            // CharacterController extends from y=-1 to y=1 relative to PlayerCapsule
+            // To align CharacterController bottom with ground (y=0 world), PlayerCapsule must be at (0, 1, 0)
             expectedLocalPosition = new Vector3(0f, 1f, 0f);
+            
+            // Ensure CharacterController center matches mesh pivot (centered)
+            if (controller != null)
+            {
+                controller.center = new Vector3(0f, 0f, 0f);
+            }
             
             // Ensure PlayerCapsule is at correct local position relative to root
             // This fixes any issues from NetworkTransform syncing
