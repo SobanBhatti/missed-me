@@ -1,0 +1,210 @@
+PROJECT_INDEX
+Asymmetrical Obstacle Multiplayer Game
+Unity 6 / URP
+
+
+CORE ARCHITECTURE
+
+GameState System
+Controls global game flow and scene transitions.
+
+Scripts
+- GameStateController
+- GameStateType
+- SceneLoader
+- SceneNames
+
+Scene State Registrars
+Each scene registers its state on load.
+
+Scripts
+- MainMenuStateRegistrar
+- LobbyStateRegistrar
+- GameplayStateRegistrar
+
+UI State Entry Points
+UI interacts only with GameStateController.
+
+Scripts
+- MainMenuUI
+- LobbyUI
+
+
+
+SCENE FLOW
+
+Bootstrap
+→ MainMenu
+→ Lobby
+→ LoadingGame
+→ Gameplay
+
+Bootstrap contains persistent systems.
+
+
+
+NETWORKING
+
+Networking Stack
+- Netcode for GameObjects
+- Unity Transport
+- Unity Relay
+- Unity Lobby
+- Unity Authentication
+
+Network Initialization
+Initializes Unity Gaming Services and authentication.
+
+Scripts
+- UGSBootstrap
+
+Lobby and Relay Management
+Handles lobby creation, joining, and relay allocation.
+
+Scripts
+- RelayLobbyNetwork
+
+Lobby UI Networking
+Handles host/join buttons and connection flow.
+
+Scripts
+- LobbyNetworkDebugUI
+
+Network Manager Location
+Bootstrap scene
+
+Components
+- NetworkManager
+- UnityTransport
+- RelayLobbyNetwork
+- UGSBootstrap
+
+
+
+NETWORK PLAYER SYSTEM
+
+Network Player Prefab
+Location
+Prefabs/Network/NetworkPlayer
+
+Components
+- NetworkObject
+- NetworkTransform
+- NetworkPlayerOwnership
+
+Authority Model
+Owner-authoritative movement.
+
+Ownership Handling
+Owner enables:
+- Camera
+- AudioListener
+- PlayerInput
+
+Remote players disable these components.
+
+Scripts
+- NetworkPlayerOwnership
+
+
+
+PLAYER CONTROLLER
+
+Movement System
+- CharacterController based movement
+- Starter Assets FirstPersonController
+- Cinemachine camera
+- Unity Input System
+
+Both Runner and Sabotager use the same base controller.
+
+
+
+GAMEPLAY ROLES
+
+Runner
+- Moves on elevated obstacle course
+- Respawns on fall
+
+Sabotager
+- Moves on ground
+- Uses abilities to disrupt runners
+
+Supported player counts
+- Up to 4 Runners
+- Up to 4 Sabotagers
+
+
+
+ABILITY SYSTEM
+
+Sabotager Ability
+Targeted knockback ability.
+
+Mechanics
+- SphereCast from camera
+- Target layer: Runner
+- Applies directional knockback force
+
+Scripts
+- TargetedPushAbility
+
+
+
+KNOCKBACK SYSTEM
+
+Receives and processes knockback forces.
+
+Scripts
+- KnockbackReceiver
+- KnockbackMovementAdapter
+
+Integration
+Knockback integrates with CharacterController movement.
+
+
+
+RESPAWN SYSTEM
+
+Detects player falling off course and respawns them.
+
+Scripts
+- RespawnOnFall
+
+Mechanics
+If player Y < killY
+→ teleport to spawn point
+
+CharacterController disabled during teleport.
+
+
+
+ENVIRONMENT
+
+Obstacle Course
+- Elevated platforms
+- Modular segment prefabs
+- Balance beams
+
+Respawn
+- Always at start platform
+
+Checkpoints
+- Not implemented
+
+
+
+SERVER GAMEPLAY BOOTSTRAP (PLANNED)
+
+NetworkGameManager
+
+Responsibilities
+- Spawn NetworkPlayer for each connected client
+- Assign Runner or Sabotager roles
+- Position players at spawn points
+- Enable cameras and input for owners
+
+Target support
+- Up to 8 players
+- Round based gameplay
+- Team switching
