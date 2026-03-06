@@ -40,8 +40,6 @@ public class PlayerMovement : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         
-        Debug.Log($"[CLIENT] PlayerMovement.OnNetworkSpawn - IsOwner: {IsOwner}, IsSpawned: {IsSpawned}");
-        
         if (IsOwner)
         {
             // Wait a frame for NetworkTransform to sync initial position
@@ -55,22 +53,7 @@ public class PlayerMovement : NetworkBehaviour
             // This fixes any issues from NetworkTransform syncing
             if (rootTransform != null)
             {
-                Debug.Log($"[CLIENT] PlayerMovement.OnNetworkSpawn - Before setting local pos - Root position: {rootTransform.position}, Capsule world: {transform.position}, Capsule local: {transform.localPosition}");
                 transform.localPosition = expectedLocalPosition;
-                Debug.Log($"[CLIENT] PlayerMovement.OnNetworkSpawn - After setting local pos - Root position: {rootTransform.position}, Capsule world: {transform.position}, Capsule local: {transform.localPosition}");
-                
-                // CRITICAL: If root is at origin (0,0,0), NetworkTransform hasn't synced yet
-                // This happens because owner clients don't receive position updates from server
-                // We need to wait for NetworkTransform to initialize, or the server needs to ensure
-                // position is synced before client spawns
-                if (rootTransform.position.magnitude < 0.1f)
-                {
-                    Debug.LogWarning($"[CLIENT] PlayerMovement.OnNetworkSpawn: Root is at origin! NetworkTransform may not have synced. Position: {rootTransform.position}");
-                }
-            }
-            else
-            {
-                Debug.LogError("[CLIENT] PlayerMovement.OnNetworkSpawn - rootTransform is NULL!");
             }
             
             LockCursor();
@@ -121,27 +104,16 @@ public class PlayerMovement : NetworkBehaviour
             {
                 transform.localPosition = expectedLocalPosition;
                 
-                // Debug: Log positions to verify spawn
-                Debug.Log($"[CLIENT] PlayerMovement: First frame after spawn - Root position: {rootTransform.position}, Capsule world: {transform.position}, Capsule local: {transform.localPosition}");
-                
-                // CRITICAL FIX: If root is at origin (0,0,0), NetworkTransform didn't sync
-                // This happens when client is owner - owner doesn't receive position from server
-                // We need to get the spawn position from NetworkGameManager or use a different approach
-                if (rootTransform.position.magnitude < 1f)
+                // CRITICAL FIX: Sync CharacterController's internal position with transform
+                // CharacterController.Move() can reset transform.position if internal position doesn't match
+                if (controller != null)
                 {
-                    Debug.LogError($"[CLIENT] PlayerMovement: Root is at origin ({rootTransform.position})! NetworkTransform failed to sync. This is why you spawn at wrong position.");
-                    
-                    // Try to get spawn position from NetworkGameManager
-                    // Note: This is a workaround - ideally NetworkTransform should handle this
-                    var gameManager = FindFirstObjectByType<NetworkGameManager>();
-                    if (gameManager != null && IsOwner)
-                    {
-                        // Get the spawn point for this client
-                        // This is a hack - we need a better way to get spawn position
-                        Debug.LogWarning("PlayerMovement: Attempting to find spawn position from NetworkGameManager...");
-                        // We can't easily get spawn position here without refactoring
-                        // The real fix needs to be in NetworkGameManager or NetworkTransform setup
-                    }
+                    controller.enabled = false;
+                    controller.transform.position = transform.position;
+                    controller.enabled = true;
+                    // Do a zero-move to update isGrounded state after re-enabling
+                    // CharacterController needs Move() to be called to detect ground
+                    controller.Move(Vector3.zero);
                 }
             }
             return;
@@ -228,27 +200,39 @@ public class PlayerMovement : NetworkBehaviour
 
         float speed = Keyboard.current.leftShiftKey.isPressed ? sprintSpeed : walkSpeed;
 
-        Vector3 horizontalMove = moveDirection * speed * Time.deltaTime;
-        controller.Move(horizontalMove);
-
-        if (controller.isGrounded && velocity.y < 0)
+        // Check grounded state at START of frame (from previous frame's Move())
+        // CharacterController.isGrounded updates after Move() is called
+        bool isGrounded = controller.isGrounded;
+        
+        // Reset vertical velocity when grounded
+        if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && controller.isGrounded)
+        // Check for jump input
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
+        // Apply gravity
         velocity.y += gravity * Time.deltaTime;
 
+        // Move horizontally
+        Vector3 horizontalMove = moveDirection * speed * Time.deltaTime;
+        controller.Move(horizontalMove);
+
+        // Move vertically
         Vector3 verticalMove = velocity * Time.deltaTime;
         controller.Move(verticalMove);
+        
+        // isGrounded will be updated for next frame after Move() calls
         
         // Track if we actually moved this frame
         movedThisFrame = horizontalMove.magnitude > 0.001f || Mathf.Abs(verticalMove.y) > 0.001f;
         
-        // Only sync root position if we actually moved
-        if (movedThisFrame && rootTransform != null)
+        // Only sync root position if we actually moved AND capsule position is reasonable
+        // CRITICAL: Don't update root if capsule position is clearly wrong (like 0,0,0 after spawn)
+        if (movedThisFrame && rootTransform != null && transform.position.magnitude > 10f)
         {
             // Calculate where root should be to keep PlayerCapsule at expected local position
             Vector3 targetRootPosition = transform.position - expectedLocalPosition;
@@ -258,6 +242,19 @@ public class PlayerMovement : NetworkBehaviour
             
             // Ensure PlayerCapsule's local position stays correct
             transform.localPosition = expectedLocalPosition;
+        }
+        else if (movedThisFrame && rootTransform != null && transform.position.magnitude <= 10f)
+        {
+            // Capsule position is wrong - sync it back to correct position
+            transform.position = rootTransform.position + expectedLocalPosition;
+            
+            // Sync CharacterController
+            if (controller != null)
+            {
+                controller.enabled = false;
+                controller.transform.position = transform.position;
+                controller.enabled = true;
+            }
         }
     }
 }

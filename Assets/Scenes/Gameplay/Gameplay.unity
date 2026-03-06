@@ -791,7 +791,7 @@ Transform:
   m_GameObject: {fileID: 1115215019}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 482.17, y: 16.11, z: 981.22}
+  m_LocalPosition: {x: 482.17, y: 17.09, z: 981.22}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -972,7 +972,7 @@ Transform:
   m_GameObject: {fileID: 1712009016}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 427.9, y: 2, z: 901.1}
+  m_LocalPosition: {x: 427.9, y: 6.58, z: 901.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1351,7 +1351,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkGameManager
   ShowTopMostFoldoutHeaderGroup: 1
-  playerPrefab: {fileID: 7220642896208397824, guid: 44ac4f9c86dbdbd4288e011ea275458d, type: 3}
+  playerPrefab: {fileID: 9100922038548227009, guid: 44ac4f9c86dbdbd4288e011ea275458d, type: 3}
   runnerSpawnPoints:
   - {fileID: 1741185894}
   - {fileID: 1034482283}

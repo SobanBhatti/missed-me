@@ -62,12 +62,75 @@ public class NetworkGameManager : NetworkBehaviour
             else
                 sabotagerIndex++;
 
-            NetworkObject playerInstance = Instantiate(
-                playerPrefab,
-                spawnPoint.position,
-                spawnPoint.rotation);
+            // Validate spawn point
+            if (spawnPoint == null)
+            {
+                Debug.LogError($"NetworkGameManager: Spawn point is null for client {clientId}! Skipping spawn.");
+                continue;
+            }
 
+            NetworkObject playerInstance = Instantiate(playerPrefab);
+
+            // Ensure PlayerCapsule is at correct local position before setting world position
+            Transform capsule = playerInstance.transform.Find("PlayerCapsule");
+            if (capsule != null)
+            {
+                capsule.localPosition = new Vector3(0f, 1f, 0f);
+            }
+
+            // Set root position at spawn point BEFORE spawning
+            playerInstance.transform.SetPositionAndRotation(
+                spawnPoint.position,
+                spawnPoint.rotation
+            );
+
+            // Get NetworkTransform BEFORE spawning
+            var networkTransform = playerInstance.GetComponent<Unity.Netcode.Components.NetworkTransform>();
+            
+            // Spawn the player object
             playerInstance.SpawnAsPlayerObject(clientId, true);
+            
+            // CRITICAL FIX: Owner clients don't receive position from NetworkTransform
+            // They spawn at prefab default (0,0,0) and never get the server's position
+            // Solution: Use ClientRpc to send spawn position to owner client
+            var ownership = playerInstance.GetComponent<NetworkPlayerOwnership>();
+            if (ownership != null)
+            {
+                ownership.SetSpawnPositionClientRpc(spawnPoint.position, spawnPoint.rotation);
+            }
+            else
+            {
+                Debug.LogError("NetworkPlayerOwnership component not found on player prefab!");
+            }
+            
+            // Also use Teleport for non-owner clients
+            if (networkTransform != null)
+            {
+                networkTransform.Teleport(
+                    spawnPoint.position,
+                    spawnPoint.rotation,
+                    playerInstance.transform.localScale
+                );
+            }
+            else
+            {
+                Debug.LogError("NetworkTransform component not found on player prefab!");
+            }
+            
+            // Ensure PlayerCapsule local position is still correct
+            if (capsule != null)
+            {
+                capsule.localPosition = new Vector3(0f, 1f, 0f);
+                
+                CharacterController charController = capsule.GetComponent<CharacterController>();
+                if (charController != null && charController.enabled)
+                {
+                    // Force CharacterController to update its internal position
+                    // by doing a zero movement - this "wakes it up" and syncs with transform
+                    charController.Move(Vector3.zero);
+                }
+            }
+            
             spawnedPlayers[clientId] = playerInstance;
         }
 
