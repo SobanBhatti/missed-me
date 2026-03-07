@@ -75,7 +75,6 @@ public class NetworkGameManager : NetworkBehaviour
             
             if (team == 0)
             {
-                Debug.LogWarning($"NetworkGameManager: Client {clientId} not found in lobby slots. Defaulting to Runner.");
                 isRunner = true;
             }
 
@@ -121,7 +120,6 @@ public class NetworkGameManager : NetworkBehaviour
             {
                 PlayerRoleType role = isRunner ? PlayerRoleType.Runner : PlayerRoleType.Sabotager;
                 playerRole.SetRoleServerRpc(role);
-                Debug.Log($"NetworkGameManager: Assigned role {role} to client {clientId} (Team {team})");
             }
             else
             {
@@ -136,11 +134,6 @@ public class NetworkGameManager : NetworkBehaviour
                 if (respawnOnFall != null)
                 {
                     respawnOnFall.SetSpawnPoint(spawnPoint);
-                    Debug.Log($"NetworkGameManager: Set spawn point for Runner client {clientId} at {spawnPoint.name}");
-                }
-                else
-                {
-                    Debug.LogWarning($"NetworkGameManager: RespawnOnFall component not found on PlayerCapsule for Runner client {clientId}");
                 }
             }
             
@@ -173,7 +166,5 @@ public class NetworkGameManager : NetworkBehaviour
             
             spawnedPlayers[clientId] = playerInstance;
         }
-
-        Debug.Log($"NetworkGameManager: Spawned {clients.Count} players with team-based roles.");
     }
 }

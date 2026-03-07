@@ -63,11 +63,6 @@ public class RespawnOnFall : MonoBehaviour
         {
             spawnPoint = closestSpawnPoint;
             cachedSpawnPoint = closestSpawnPoint;
-            Debug.Log($"RespawnOnFall: Found spawn point '{closestSpawnPoint.name}' at distance {closestDistance:F2}");
-        }
-        else
-        {
-            Debug.LogWarning("RespawnOnFall: Could not find spawn point automatically. Player will respawn at (0,0,0) if they fall.");
         }
     }
 
