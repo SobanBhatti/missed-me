@@ -1,5 +1,6 @@
 using Core.GameState;
 using System;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +11,7 @@ public class LobbyNetworkDebugUI : MonoBehaviour
     [SerializeField] private Button hostButton;
     [SerializeField] private Button joinButton;
 
-    [Tooltip("Lobby Id to join (paste from host log).")]
+    [Tooltip("Lobby Id or 6-digit join code to join.")]
     [SerializeField] private TMP_InputField lobbyIdInput;
 
     private RelayLobbyNetwork _net;
@@ -50,15 +51,33 @@ public class LobbyNetworkDebugUI : MonoBehaviour
     {
         try
         {
-            string lobbyId = lobbyIdInput != null ? lobbyIdInput.text : string.Empty;
-            if (string.IsNullOrWhiteSpace(lobbyId))
+            string input = lobbyIdInput != null ? lobbyIdInput.text.Trim() : string.Empty;
+            if (string.IsNullOrWhiteSpace(input))
             {
-                Debug.LogError("Join failed: Lobby Id is empty.");
+                Debug.LogError("Join failed: Join code is empty.");
                 return;
             }
 
             SetInteractable(false);
-            await _net.JoinAsync(lobbyId.Trim());
+            
+            // If input is 6 digits, try joining by short code first
+            if (input.Length == 6 && Regex.IsMatch(input, @"^\d{6}$"))
+            {
+                try
+                {
+                    await _net.JoinByShortCodeAsync(input);
+                }
+                catch
+                {
+                    // If short code join fails, try as regular lobby ID
+                    await _net.JoinAsync(input);
+                }
+            }
+            else
+            {
+                // Try as regular lobby ID
+                await _net.JoinAsync(input);
+            }
 
             // Use your existing flow: MainMenu -> Lobby
             GameStateController.Instance.SetState(GameStateType.Lobby);

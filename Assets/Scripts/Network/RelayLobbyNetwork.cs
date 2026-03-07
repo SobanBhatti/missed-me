@@ -17,11 +17,13 @@ public class RelayLobbyNetwork : MonoBehaviour
     [SerializeField] private int maxPlayers = 8;
 
     private const string RelayJoinCodeKey = "relayJoinCode";
+    private const string ShortJoinCodeKey = "shortJoinCode";
 
     private NetworkManager _nm;
     private UnityTransport _utp;
 
     public Lobby CurrentLobby { get; private set; }
+    public string ShortJoinCode { get; private set; }
 
     private void Awake()
     {
@@ -40,7 +42,11 @@ public class RelayLobbyNetwork : MonoBehaviour
         Allocation alloc = await RelayService.Instance.CreateAllocationAsync(maxPlayers - 1);
         string joinCode = await RelayService.Instance.GetJoinCodeAsync(alloc.AllocationId);
 
-        // 2) Create Lobby and publish relay join code
+        // 2) Generate a simple 6-digit join code
+        string shortCode = GenerateShortJoinCode();
+        ShortJoinCode = shortCode;
+
+        // 3) Create Lobby and publish relay join code and short code
         var createOptions = new CreateLobbyOptions
         {
             IsPrivate = false,
@@ -49,6 +55,10 @@ public class RelayLobbyNetwork : MonoBehaviour
                 {
                     RelayJoinCodeKey,
                     new DataObject(DataObject.VisibilityOptions.Public, joinCode)
+                },
+                {
+                    ShortJoinCodeKey,
+                    new DataObject(DataObject.VisibilityOptions.Public, shortCode)
                 }
             }
         };
@@ -62,7 +72,48 @@ public class RelayLobbyNetwork : MonoBehaviour
         // 4) Start Host
         bool started = _nm.StartHost();
         if (!started) Debug.LogError("RelayLobbyNetwork: StartHost failed.");
-        else Debug.Log($"Host started. LobbyId={CurrentLobby.Id} JoinCode={joinCode}");
+        else Debug.Log($"Host started. LobbyId={CurrentLobby.Id} JoinCode={joinCode} ShortCode={shortCode}");
+    }
+    
+    public async Task JoinByShortCodeAsync(string shortCode)
+    {
+        EnsureUGSReady();
+        
+        // Query public lobbies and filter by short join code in data
+        var queryLobbiesOptions = new QueryLobbiesOptions
+        {
+            Count = 25
+        };
+        
+        var queryResponse = await LobbyService.Instance.QueryLobbiesAsync(queryLobbiesOptions);
+        
+        if (queryResponse.Results == null || queryResponse.Results.Count == 0)
+        {
+            throw new Exception($"No lobbies found. Make sure the host has created a lobby.");
+        }
+        
+        // Find lobby with matching short code
+        foreach (var lobby in queryResponse.Results)
+        {
+            if (lobby.Data != null && 
+                lobby.Data.TryGetValue(ShortJoinCodeKey, out var shortCodeObj) &&
+                shortCodeObj.Value == shortCode)
+            {
+                // Found matching lobby, join it
+                await JoinAsync(lobby.Id);
+                return;
+            }
+        }
+        
+        throw new Exception($"No lobby found with join code: {shortCode}");
+    }
+    
+    private string GenerateShortJoinCode()
+    {
+        // Generate a random 6-digit code (000000-999999)
+        System.Random random = new System.Random();
+        int code = random.Next(0, 1000000);
+        return code.ToString("D6"); // Format as 6 digits with leading zeros
     }
 
     public async Task JoinAsync(string lobbyId)
@@ -72,7 +123,13 @@ public class RelayLobbyNetwork : MonoBehaviour
         // 1) Join Lobby
         CurrentLobby = await LobbyService.Instance.JoinLobbyByIdAsync(lobbyId);
 
-        // 2) Read Relay join code from lobby data
+        // 2) Read short join code from lobby data (for display)
+        if (CurrentLobby.Data != null && CurrentLobby.Data.TryGetValue(ShortJoinCodeKey, out DataObject shortCodeObj))
+        {
+            ShortJoinCode = shortCodeObj.Value;
+        }
+
+        // 3) Read Relay join code from lobby data
         if (CurrentLobby.Data == null || !CurrentLobby.Data.TryGetValue(RelayJoinCodeKey, out DataObject relayCodeObj))
         {
             Debug.LogError("RelayLobbyNetwork: Lobby missing relayJoinCode data.");
@@ -81,17 +138,17 @@ public class RelayLobbyNetwork : MonoBehaviour
 
         string joinCode = relayCodeObj.Value;
 
-        // 3) Join Relay allocation (client)
+        // 4) Join Relay allocation (client)
         JoinAllocation joinAlloc = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
-        // 4) Configure transport to use Relay (client)
+        // 5) Configure transport to use Relay (client)
         RelayServerData relayServerData = AllocationUtils.ToRelayServerData(joinAlloc, "dtls");
         _utp.SetRelayServerData(relayServerData);
 
-        // 5) Start Client
+        // 6) Start Client
         bool started = _nm.StartClient();
         if (!started) Debug.LogError("RelayLobbyNetwork: StartClient failed.");
-        else Debug.Log($"Client started. LobbyId={CurrentLobby.Id}");
+        else Debug.Log($"Client started. LobbyId={CurrentLobby.Id} ShortCode={ShortJoinCode}");
     }
 
     public async Task LeaveLobbyAsync()

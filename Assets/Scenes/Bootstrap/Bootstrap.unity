@@ -360,6 +360,7 @@ GameObject:
   - component: {fileID: 1397073925}
   - component: {fileID: 1397073924}
   - component: {fileID: 1397073927}
+  - component: {fileID: 1397073928}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -468,6 +469,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RelayLobbyNetwork
   lobbyName: MissedMeLobby
   maxPlayers: 8
+--- !u!114 &1397073928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1397073923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4888984326af4b43a7c552af72d653e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LobbySlotManagerSpawner
+  lobbySlotManagerPrefab: {fileID: 2427904850799772257, guid: fa3ec3e9b9110db48996de6beddbee47, type: 3}
 --- !u!1 &2075468915
 GameObject:
   m_ObjectHideFlags: 0
