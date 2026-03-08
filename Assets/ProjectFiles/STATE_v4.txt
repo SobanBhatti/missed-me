@@ -2,6 +2,14 @@ STATE_v4
 
 Current project state
 
+END GOAL
+Multiplayer minigame playlist platform (similar to GTA V's Playlist system):
+- Host selects game modes from available minigames to create custom playlists
+- Each game mode has its own scene
+- Each game mode can have multiple turns/matches within a round
+- Players progress through the playlist, accumulating scores across all minigames
+- RunnerSabotager is one of many game modes in the collection
+
 
 CORE ARCHITECTURE
 
@@ -245,18 +253,29 @@ Location
 
 Responsibilities
 
-- Maintain playlist of rounds (scene + game mode)
+- Maintain playlist of minigames (scene + game mode)
 - Track current round index
-- Initialize and track player scores
-- Load next round from playlist
+- Initialize and track player scores across all minigames
+- Load next minigame from playlist
 - End match when playlist completes
+- Support multiple turns/matches per game mode
 
 Playlist System
 
-- Serialized list of PlaylistEntry in inspector
+- Currently: Serialized list of PlaylistEntry in inspector
 - Each entry contains sceneName (string) and gameMode (GameModeType)
+- Each entry represents one minigame in the playlist
 - Server-authoritative round progression
 - Automatic scene loading via NetworkManager.SceneManager
+- Scores accumulate across all minigames in playlist
+
+Playlist Customization (Planned - Critical Feature)
+
+- Host can cherry-pick game modes in lobby before match starts
+- Available game modes: RunnerSabotager, Race, Minigame, Puzzle, etc.
+- Each game mode can be added multiple times to playlist
+- Playlist configuration should be synced to all clients
+- Playlist persists for entire match session
 
 Round Progression Flow
 
@@ -271,24 +290,33 @@ LoadNextRound()
 - Checks if playlist exhausted -> EndMatch()
 - Loads scene from current playlist entry
 - Uses NetworkManager.SceneManager.LoadScene() for multiplayer sync
+- Each game mode can have multiple turns/matches before advancing
 
 EndMatch()
 - Called when playlist is complete
 - Currently logs match finished
-- Future: will load results scene
+- Future: will load results scene showing cumulative scores
 
 Integration Points
 
 - LobbyUI.OnStartMatchClicked() -> MatchSessionManager.StartMatch()
 - RoundEndTrigger.EndRound() -> MatchSessionManager.LoadNextRound()
-- RunnerRoundTracker -> MatchSessionManager.LoadNextRound() when all runners fall
+- GameModeManagers can trigger round end when conditions met (e.g., RunnerRoundTracker)
 
 Game Mode Types
 
-- RunnerSabotager
-- Race
-- Minigame
-- Puzzle
+- RunnerSabotager (asymmetrical obstacle course)
+- Race (competitive racing)
+- Minigame (various small games)
+- Puzzle (puzzle-solving challenges)
+- Additional game modes can be added
+
+Game Mode Architecture
+
+- Each game mode has its own scene
+- Each game mode has its own GameModeManager implementation
+- Game modes are independent and can be mixed in playlists
+- Each game mode can support multiple turns/matches per round
 
 Scripts
 
@@ -708,15 +736,18 @@ Known remaining cleanup items
 
 Not implemented yet
 
+- Playlist customization in lobby (host cherry-picks game modes) - CRITICAL
+- Multiple turns/matches per game mode support
 - Round timer / round loop UI
 - Team switching between rounds
-- Score system UI and persistence
+- Score system UI and persistence across minigames
 - Win/loss conditions
 - Checkpoints
 - Match restart flow
 - Return-to-lobby flow after gameplay
 - Disconnect/rejoin recovery mid-match
 - Results scene after match completion
+- Additional game mode scenes and implementations
 
 
 AUTHORITATIVE RULES
@@ -751,22 +782,37 @@ Match progression authority
 
 NEXT RECOMMENDED SYSTEMS
 
-1. Score system
-- Track runner success / sabotager success
+1. Playlist customization in lobby (CRITICAL - Core Feature)
+- Host UI to select available game modes
+- Add/remove game modes from playlist
+- Reorder playlist entries
+- Sync playlist configuration to all clients
+- Store playlist in MatchSessionManager before match starts
+
+2. Multiple turns/matches per game mode
+- Support game modes that need multiple rounds (e.g., best of 3)
+- Track turn count within game mode
+- Advance to next game mode only when all turns complete
+
+3. Score system
+- Track scores per minigame
+- Accumulate scores across all minigames in playlist
+- Display score UI during and after matches
 - Persist scores across rounds
-- Display score UI
 
-2. Match flow completion
-- Results scene after match
+4. Match flow completion
+- Results scene after match showing cumulative scores
 - Return to lobby or rematch option
+- Display final rankings
 
-3. Round timer
+5. Additional game mode implementations
+- Create new game mode scenes
+- Implement new GameModeManager classes
+- Add to available game modes list
+
+6. Round timer
 - Visual countdown
 - Automatic round end on timeout
 
-4. Player naming / identity polish
+7. Player naming / identity polish
 - Replace fallback Player <clientId> labels with actual player identity data
-
-5. Checkpoint system
-- Implement checkpoint respawn logic
-- Track checkpoint progress

@@ -4,7 +4,9 @@ alwaysApply: true
 
 # Unity Game Development Guidelines
 
-This project is an asymmetrical multiplayer physics-based competitive game built in Unity 6 using URP, the New Input System, Starter Assets (First Person Controller), Cinemachine, and CharacterController-based movement (not Rigidbody locomotion).
+This project is a multiplayer minigame playlist platform (similar to GTA V's Playlist system) built in Unity 6 using URP, the New Input System, Starter Assets (First Person Controller), Cinemachine, and CharacterController-based movement (not Rigidbody locomotion).
+
+The platform supports multiple game modes, each with its own scene. Host can cherry-pick game modes to create custom playlists. RunnerSabotager is one of many game modes in the collection.
 
 ## Authoritative Architecture Rule
 
@@ -12,18 +14,22 @@ The latest STATE_vX file in [Assets/ProjectFiles](mdc:Assets/ProjectFiles) is th
 
 ## Project Architecture
 
+- Multiplayer minigame playlist platform
+- Each game mode has its own scene
+- MatchSessionManager handles playlist progression
+- Host can customize playlist in lobby (planned feature)
 - CharacterController-based player movement
 - Custom knockback system using force vectors
-- Layer-based interaction system (Runner / Sabotager roles)
+- Layer-based interaction system (game-mode specific, e.g., Runner / Sabotager roles)
 - GameState system with persistent Bootstrap scene
 - GameStateController singleton (DontDestroyOnLoad)
 - Centralized scene transitions
 - SceneNames constants (no magic strings)
 - Scene self-registration (MainMenu, Lobby, Gameplay)
-- Flow: Boot → MainMenu → Lobby → LoadingGame → Gameplay
+- Flow: Boot → MainMenu → Lobby → LoadingGame → Gameplay (via playlist)
 - Scene loading currently single-mode (no additive system)
-- Multiplayer planned (currently local testing phase)
-- Asymmetrical team obstacle course design (Runners vs Sabotagers)
+- Multiplayer with Netcode for GameObjects
+- Game modes are independent and can be mixed in playlists
 
 ## Operational Behavior
 

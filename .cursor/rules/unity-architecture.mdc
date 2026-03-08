@@ -17,12 +17,15 @@ See [PROJECT_INDEX.txt](mdc:Assets/ProjectFiles/PROJECT_INDEX.txt) for complete 
 
 ## Architecture Rules
 
+- Multiplayer minigame playlist platform - each game mode has its own scene
+- MatchSessionManager handles playlist progression across multiple game modes
 - CharacterController-based movement (not Rigidbody locomotion)
 - Owner-authoritative movement for network players
 - GameState system with Bootstrap scene persistence
-- Scene flow: Boot → MainMenu → Lobby → LoadingGame → Gameplay
+- Scene flow: Boot → MainMenu → Lobby → LoadingGame → Gameplay (via playlist)
 - Consult latest STATE_vX file in [Assets/ProjectFiles](mdc:Assets/ProjectFiles) before architectural changes
 - Systems defined in STATE_vX are assumed implemented and working
+- Game modes are independent and can be mixed in playlists
 
 ## Coding Standards
 
@@ -37,13 +40,17 @@ See [PROJECT_INDEX.txt](mdc:Assets/ProjectFiles/PROJECT_INDEX.txt) for complete 
 
 ## Player Roles
 
+Roles are game-mode specific. RunnerSabotager game mode uses:
 - **Runner**: Moves on elevated obstacle course, respawns on fall
 - **Sabotager**: Moves on ground, uses abilities to disrupt runners
 - Supports up to 4 Runners and 4 Sabotagers
 
+Other game modes may use different role systems or no roles at all.
+
 ## Key Script Locations
 
 - GameState: [GameStateController](mdc:Assets/Scripts), [SceneLoader](mdc:Assets/Scripts)
+- Match Session: [MatchSessionManager](mdc:Assets/Scripts/Session/Core), [PlaylistEntry](mdc:Assets/Scripts/Session/Data)
 - Networking: [RelayLobbyNetwork](mdc:Assets/Scripts), [UGSBootstrap](mdc:Assets/Scripts)
 - Gameplay: [GameModeManager](mdc:Assets/Scripts/Gameplay/GameModes), [PlayerRole](mdc:Assets/Scripts)
 - Abilities: [TargetedPushAbility](mdc:Assets/Scripts)

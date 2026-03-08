@@ -1,6 +1,14 @@
 PROJECT_INDEX
-Asymmetrical Obstacle Multiplayer Game
+Multiplayer Minigame Playlist Platform
 Unity 6 / URP
+
+END GOAL
+A multiplayer minigame collection platform (similar to GTA V's Playlist system) where:
+- Host selects game modes from available minigames to create custom playlists
+- Each game mode has its own scene
+- Each game mode can have multiple turns/matches within a round
+- Players progress through the playlist, accumulating scores across all minigames
+- RunnerSabotager is one of many game modes in the collection
 
 
 CORE ARCHITECTURE
@@ -44,32 +52,42 @@ Bootstrap contains persistent systems.
 MATCH SESSION SYSTEM
 
 Match Session Management
-Handles multi-round match progression through playlist.
+Handles multi-round match progression through custom minigame playlists.
 
 Scripts
 - MatchSessionManager
 
 Responsibilities
-- Maintain playlist of rounds (scene + game mode)
+- Maintain playlist of minigames (scene + game mode)
 - Track current round index
-- Initialize player scores
-- Load next round from playlist
+- Initialize and persist player scores across all minigames
+- Load next minigame from playlist
 - End match when playlist completes
+- Support multiple turns/matches per game mode
 
 Playlist System
-- Configurable list of PlaylistEntry (sceneName + gameMode)
+- Host-selectable list of PlaylistEntry (sceneName + gameMode)
+- Each entry represents one minigame in the playlist
 - Server-authoritative round progression
 - Automatic scene loading via NetworkManager.SceneManager
+- Scores accumulate across all minigames in playlist
+
+Playlist Customization (Planned)
+- Host can cherry-pick game modes in lobby
+- Available game modes: RunnerSabotager, Race, Minigame, Puzzle, etc.
+- Each game mode can be added multiple times to playlist
+- Playlist persists for entire match session
 
 Round Progression
-- StartMatch() initializes scores and loads first round
+- StartMatch() initializes scores and loads first minigame
 - LoadNextRound() advances to next playlist entry
+- Each game mode can have multiple turns/matches before advancing
 - EndMatch() called when playlist exhausted
 
 Integration
 - LobbyUI calls MatchSessionManager.StartMatch()
 - RoundEndTrigger calls MatchSessionManager.LoadNextRound()
-- RunnerRoundTracker can trigger round end when all runners fall
+- GameModeManagers can trigger round end when conditions met
 
 
 NETWORKING
@@ -151,6 +169,8 @@ Both Runner and Sabotager use the same base controller.
 
 GAMEPLAY ROLES
 
+Role system is game-mode specific. RunnerSabotager uses:
+
 Runner
 - Moves on elevated obstacle course
 - Respawns on fall
@@ -159,9 +179,11 @@ Sabotager
 - Moves on ground
 - Uses abilities to disrupt runners
 
-Supported player counts
+Supported player counts (RunnerSabotager)
 - Up to 4 Runners
 - Up to 4 Sabotagers
+
+Note: Other game modes may use different role systems or no roles at all.
 
 
 GAME MODE SYSTEM
@@ -180,10 +202,17 @@ GameModeManager Responsibilities
 - Provide spawn point selection logic
 
 Game Mode Types
-- RunnerSabotager
-- Race
-- Minigame
-- Puzzle
+- RunnerSabotager (asymmetrical obstacle course)
+- Race (competitive racing)
+- Minigame (various small games)
+- Puzzle (puzzle-solving challenges)
+- Additional game modes can be added
+
+Architecture
+- Each game mode has its own scene
+- Each game mode has its own GameModeManager implementation
+- Game modes are independent and can be mixed in playlists
+- Each game mode can support multiple turns/matches per round
 
 Scripts
 - GameModeType (enum)
