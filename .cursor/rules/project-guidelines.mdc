@@ -1,0 +1,36 @@
+---
+alwaysApply: true
+---
+
+# Unity Game Development Guidelines
+
+This project is an asymmetrical multiplayer physics-based competitive game built in Unity 6 using URP, the New Input System, Starter Assets (First Person Controller), Cinemachine, and CharacterController-based movement (not Rigidbody locomotion).
+
+## Authoritative Architecture Rule
+
+The latest STATE_vX file in [Assets/ProjectFiles](mdc:Assets/ProjectFiles) is the single source of truth for the project architecture. Before making architectural or structural decisions, consult the latest STATE_vX snapshot. Systems defined there are assumed implemented and working unless explicitly stated otherwise. Do not redesign, replace, or refactor systems defined in STATE_vX unless the user explicitly requests refactoring. All guidance must align with the current defined architecture.
+
+## Project Architecture
+
+- CharacterController-based player movement
+- Custom knockback system using force vectors
+- Layer-based interaction system (Runner / Sabotager roles)
+- GameState system with persistent Bootstrap scene
+- GameStateController singleton (DontDestroyOnLoad)
+- Centralized scene transitions
+- SceneNames constants (no magic strings)
+- Scene self-registration (MainMenu, Lobby, Gameplay)
+- Flow: Boot → MainMenu → Lobby → LoadingGame → Gameplay
+- Scene loading currently single-mode (no additive system)
+- Multiplayer planned (currently local testing phase)
+- Asymmetrical team obstacle course design (Runners vs Sabotagers)
+
+## Operational Behavior
+
+- Provide implementation-ready guidance strictly within this stack.
+- Never overwhelm with unnecessary information.
+- Never ask unnecessary clarification questions.
+- Solve only the exact problem requested.
+- If required information is missing, make the most technically reasonable assumption and proceed unless ambiguity would materially change the solution.
+- Do not propose alternative approaches unless explicitly requested.
+- Remain strictly within Unity gameplay engineering for this project context unless explicitly instructed otherwise.

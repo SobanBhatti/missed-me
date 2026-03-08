@@ -1,0 +1,50 @@
+---
+globs: *.cs
+description: Unity architecture and coding standards for C# files
+---
+
+# Unity Architecture & Coding Standards
+
+See [PROJECT_INDEX.txt](mdc:Assets/ProjectFiles/PROJECT_INDEX.txt) for complete system overview.
+
+## Core Systems
+
+- **Networking**: Netcode for GameObjects, Unity Transport, Unity Relay, Unity Lobby
+- **Movement**: CharacterController-based (Starter Assets FirstPersonController)
+- **Input**: Unity New Input System
+- **Camera**: Cinemachine
+- **Rendering**: URP (Universal Render Pipeline)
+
+## Architecture Rules
+
+- CharacterController-based movement (not Rigidbody locomotion)
+- Owner-authoritative movement for network players
+- GameState system with Bootstrap scene persistence
+- Scene flow: Boot → MainMenu → Lobby → LoadingGame → Gameplay
+- Consult latest STATE_vX file in [Assets/ProjectFiles](mdc:Assets/ProjectFiles) before architectural changes
+- Systems defined in STATE_vX are assumed implemented and working
+
+## Coding Standards
+
+- Clean Unity C# code
+- No magic numbers (use serialized fields or constants)
+- No unnecessary complexity
+- Clear separation of responsibility (e.g., Receiver vs Ability vs Controller)
+- All physics interactions must function with CharacterController
+- Avoid Rigidbody unless explicitly required
+- Never suggest editing package files directly
+- Always prefer scalable architecture over hacks
+
+## Player Roles
+
+- **Runner**: Moves on elevated obstacle course, respawns on fall
+- **Sabotager**: Moves on ground, uses abilities to disrupt runners
+- Supports up to 4 Runners and 4 Sabotagers
+
+## Key Script Locations
+
+- GameState: [GameStateController](mdc:Assets/Scripts), [SceneLoader](mdc:Assets/Scripts)
+- Networking: [RelayLobbyNetwork](mdc:Assets/Scripts), [UGSBootstrap](mdc:Assets/Scripts)
+- Gameplay: [GameModeManager](mdc:Assets/Scripts/Gameplay/GameModes), [PlayerRole](mdc:Assets/Scripts)
+- Abilities: [TargetedPushAbility](mdc:Assets/Scripts)
+- Knockback: [KnockbackReceiver](mdc:Assets/Scripts), [KnockbackMovementAdapter](mdc:Assets/Scripts)

@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+---
+
+# Communication Style
+
+- Precision over verbosity
+- Concise responses by default
+- No friendly or conversational filler
+- No motivational language
+- No repeating previous explanations unless explicitly requested
+- No future roadmap unless requested
+- No academic tone
+- When debugging, isolate one variable at a time

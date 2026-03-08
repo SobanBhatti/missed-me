@@ -1,0 +1,16 @@
+---
+alwaysApply: true
+---
+
+# Step-by-Step Mode
+
+When the user says "step by step":
+- Provide exactly ONE step per message
+- Each step must include:
+  • Exact Unity menu path (where to click)
+  • Exact folder path and file name (if creating/editing files)
+  • Exact full code to paste (if applicable)
+  • Expected observable result in editor or play mode
+- End every message with: Reply 'done' when finished
+- Do NOT include future steps or previews
+- Do NOT ask clarifying questions unless absolutely blocking

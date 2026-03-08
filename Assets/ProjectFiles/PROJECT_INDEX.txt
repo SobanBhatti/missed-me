@@ -30,17 +30,46 @@ Scripts
 - LobbyUI
 
 
-
 SCENE FLOW
 
 Bootstrap
 → MainMenu
 → Lobby
 → LoadingGame
-→ Gameplay
+→ Gameplay (via MatchSessionManager playlist)
 
 Bootstrap contains persistent systems.
 
+
+MATCH SESSION SYSTEM
+
+Match Session Management
+Handles multi-round match progression through playlist.
+
+Scripts
+- MatchSessionManager
+
+Responsibilities
+- Maintain playlist of rounds (scene + game mode)
+- Track current round index
+- Initialize player scores
+- Load next round from playlist
+- End match when playlist completes
+
+Playlist System
+- Configurable list of PlaylistEntry (sceneName + gameMode)
+- Server-authoritative round progression
+- Automatic scene loading via NetworkManager.SceneManager
+
+Round Progression
+- StartMatch() initializes scores and loads first round
+- LoadNextRound() advances to next playlist entry
+- EndMatch() called when playlist exhausted
+
+Integration
+- LobbyUI calls MatchSessionManager.StartMatch()
+- RoundEndTrigger calls MatchSessionManager.LoadNextRound()
+- RunnerRoundTracker can trigger round end when all runners fall
 
 
 NETWORKING
@@ -78,7 +107,8 @@ Components
 - UnityTransport
 - RelayLobbyNetwork
 - UGSBootstrap
-
+- LobbySlotManagerSpawner
+- MatchSessionManager
 
 
 NETWORK PLAYER SYSTEM
@@ -91,6 +121,7 @@ Components
 - NetworkObject
 - NetworkTransform
 - NetworkPlayerOwnership
+- PlayerRole
 
 Authority Model
 Owner-authoritative movement.
@@ -107,7 +138,6 @@ Scripts
 - NetworkPlayerOwnership
 
 
-
 PLAYER CONTROLLER
 
 Movement System
@@ -117,7 +147,6 @@ Movement System
 - Unity Input System
 
 Both Runner and Sabotager use the same base controller.
-
 
 
 GAMEPLAY ROLES
@@ -135,6 +164,55 @@ Supported player counts
 - Up to 4 Sabotagers
 
 
+GAME MODE SYSTEM
+
+Game Mode Managers
+Base class for all game mode implementations.
+
+Scripts
+- GameModeManager (abstract base)
+- RunnerSabotagerGameManager
+- RaceGameManager
+
+GameModeManager Responsibilities
+- Find all SpawnPoint components in scene
+- Spawn players for connected clients
+- Provide spawn point selection logic
+
+Game Mode Types
+- RunnerSabotager
+- Race
+- Minigame
+- Puzzle
+
+Scripts
+- GameModeType (enum)
+
+
+SPAWN POINT SYSTEM
+
+Spawn Point Component
+Location-based spawn point system with type and index.
+
+Scripts
+- SpawnPoint
+- SpawnPointType (enum)
+
+SpawnPoint Properties
+- type: SpawnPointType (Generic, RunnerStart, SabotagerStart, RaceStart, Checkpoint)
+- index: int (for ordering multiple spawns of same type)
+
+Spawn Point Assignment
+- GameModeManager finds all SpawnPoints on scene load
+- RunnerSabotagerGameManager assigns by role and index
+- Players of same role assigned to spawns in order
+- Falls back to Generic spawn if role-specific not found
+
+Fixed Behavior
+- SpawnPoints automatically discovered via FindObjectsByType
+- Proper role-based assignment with index cycling
+- Respawn points assigned from initial spawn location
+
 
 ABILITY SYSTEM
 
@@ -150,7 +228,6 @@ Scripts
 - TargetedPushAbility
 
 
-
 KNOCKBACK SYSTEM
 
 Receives and processes knockback forces.
@@ -161,7 +238,6 @@ Scripts
 
 Integration
 Knockback integrates with CharacterController movement.
-
 
 
 RESPAWN SYSTEM
@@ -178,6 +254,20 @@ If player Y < killY
 CharacterController disabled during teleport.
 
 
+ROUND SYSTEM
+
+Round End Triggers
+Multiple ways to end a round and progress to next.
+
+Scripts
+- RoundEndTrigger (manual trigger)
+- RunnerRoundTracker (automatic when all runners fall)
+
+Round End Flow
+- Trigger calls MatchSessionManager.LoadNextRound()
+- MatchSessionManager loads next playlist entry
+- New scene loads with appropriate GameModeManager
+
 
 ENVIRONMENT
 
@@ -187,24 +277,7 @@ Obstacle Course
 - Balance beams
 
 Respawn
-- Always at start platform
+- Assigned from runner spawn point
 
 Checkpoints
-- Not implemented
-
-
-
-SERVER GAMEPLAY BOOTSTRAP (PLANNED)
-
-NetworkGameManager
-
-Responsibilities
-- Spawn NetworkPlayer for each connected client
-- Assign Runner or Sabotager roles
-- Position players at spawn points
-- Enable cameras and input for owners
-
-Target support
-- Up to 8 players
-- Round based gameplay
-- Team switching
+- SpawnPointType.Checkpoint exists but not yet implemented
