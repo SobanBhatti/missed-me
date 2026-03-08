@@ -133,6 +133,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 156629479}
+  - component: {fileID: 156629480}
   m_Layer: 0
   m_Name: SabotagerSpawn_3
   m_TagString: Untagged
@@ -155,6 +156,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1712009017}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &156629480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 156629478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 2
+  index: 2
 --- !u!1 &281908724
 GameObject:
   m_ObjectHideFlags: 0
@@ -428,6 +443,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 434641237}
+  - component: {fileID: 434641238}
   m_Layer: 0
   m_Name: SabotagerSpawn_1
   m_TagString: Untagged
@@ -450,6 +466,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1712009017}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &434641238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 434641236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 2
+  index: 0
 --- !u!1 &451650266
 GameObject:
   m_ObjectHideFlags: 0
@@ -459,6 +489,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 451650267}
+  - component: {fileID: 451650268}
   m_Layer: 0
   m_Name: SabotagerSpawn_4
   m_TagString: Untagged
@@ -481,6 +512,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1712009017}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &451650268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 451650266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 2
+  index: 3
 --- !u!1 &464310810
 GameObject:
   m_ObjectHideFlags: 0
@@ -490,6 +535,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 464310811}
+  - component: {fileID: 464310812}
   m_Layer: 0
   m_Name: SabotagerSpawn_2
   m_TagString: Untagged
@@ -512,6 +558,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1712009017}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &464310812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 464310810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 2
+  index: 1
 --- !u!1 &554908997
 GameObject:
   m_ObjectHideFlags: 0
@@ -521,6 +581,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 554908998}
+  - component: {fileID: 554908999}
   m_Layer: 0
   m_Name: RunnerSpawn_3
   m_TagString: Untagged
@@ -543,6 +604,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1115215020}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &554908999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 554908997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 1
+  index: 2
 --- !u!1 &769361585
 GameObject:
   m_ObjectHideFlags: 0
@@ -713,6 +788,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 939366849}
+  - component: {fileID: 939366850}
   m_Layer: 0
   m_Name: RunnerSpawn_4
   m_TagString: Untagged
@@ -735,6 +811,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1115215020}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &939366850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 939366848}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 1
+  index: 3
 --- !u!1 &1034482282
 GameObject:
   m_ObjectHideFlags: 0
@@ -744,6 +834,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1034482283}
+  - component: {fileID: 1034482284}
   m_Layer: 0
   m_Name: RunnerSpawn_2
   m_TagString: Untagged
@@ -766,6 +857,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1115215020}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1034482284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034482282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 1
+  index: 1
 --- !u!1 &1115215019
 GameObject:
   m_ObjectHideFlags: 0
@@ -811,8 +916,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1417131937}
   - component: {fileID: 1417131936}
+  - component: {fileID: 1417131939}
+  - component: {fileID: 1417131938}
   m_Layer: 0
-  m_Name: GameplayRoot
+  m_Name: RunnersAndSabotagersGameMode
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -842,9 +949,48 @@ Transform:
   m_LocalPosition: {x: 3838.9778, y: -0.00001, z: 56345.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1857769913}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1417131938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1417131935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3990502c971d3e641b8893e36fe7672f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.GameModes.RunnerRoundTracker
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &1417131939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1417131935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3995017985
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1533756471
 GameObject:
   m_ObjectHideFlags: 0
@@ -1053,6 +1199,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1741185894}
+  - component: {fileID: 1741185895}
   m_Layer: 0
   m_Name: RunnerSpawn_1
   m_TagString: Untagged
@@ -1075,6 +1222,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1115215020}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1741185895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741185893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdfee42a6fecbbe45855b2dd5d1217c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gameplay.Spawning.SpawnPoint
+  type: 1
+  index: 0
 --- !u!1 &1795931145
 GameObject:
   m_ObjectHideFlags: 0
@@ -1292,7 +1453,7 @@ GameObject:
   - component: {fileID: 1857769914}
   - component: {fileID: 1857769915}
   m_Layer: 0
-  m_Name: NetworkGameManager
+  m_Name: RunnerSabotagerGameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1306,12 +1467,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1857769912}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.22918, y: 0.22602, z: 80.05505}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -3833.7485, y: 0.22602999, z: -56265.105}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1417131937}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1857769914
 MonoBehaviour:
@@ -1748,6 +1909,5 @@ SceneRoots:
   - {fileID: 1533756475}
   - {fileID: 2144668715}
   - {fileID: 1417131937}
-  - {fileID: 1857769913}
   - {fileID: 1115215020}
   - {fileID: 1712009017}

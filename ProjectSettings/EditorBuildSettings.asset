@@ -15,8 +15,11 @@ EditorBuildSettings:
     path: Assets/Scenes/Menus/Lobby.unity
     guid: 62c1c180f84536f4f9ee20be188631a9
   - enabled: 1
-    path: Assets/Scenes/Gameplay/Gameplay.unity
+    path: Assets/Scenes/GameModes/RunnersAndSabotagers.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/GameModes/Race01.unity
+    guid: 5641f65b8e4b13f49ac5e79722e7cab1
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

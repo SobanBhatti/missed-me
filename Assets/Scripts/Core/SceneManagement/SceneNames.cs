@@ -5,6 +5,7 @@ namespace Core.SceneManagement
         public const string Bootstrap = "Bootstrap";
         public const string MainMenu = "MainMenu";
         public const string Lobby = "Lobby";
-        public const string Gameplay = "Gameplay";
+
+        public const string RunnersAndSabotagers = "RunnersAndSabotagers";
     }
 }

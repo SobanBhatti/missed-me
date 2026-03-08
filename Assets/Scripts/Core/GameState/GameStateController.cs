@@ -76,7 +76,7 @@ namespace Core.GameState
                     break;
 
                 case GameStateType.LoadingGame:
-                    SceneLoader.Instance.LoadScene(SceneNames.Gameplay);
+                    SceneLoader.Instance.LoadScene(SceneNames.RunnersAndSabotagers);
                     break;
 
                 case GameStateType.ReturningToMenu:

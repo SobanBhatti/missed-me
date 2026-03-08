@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using Session.Core;
 
 namespace Core.GameState
 {
@@ -7,17 +8,22 @@ namespace Core.GameState
     {
         public void OnStartMatchClicked()
         {
-            // Only allow the host/server to start the game
             var networkManager = NetworkManager.Singleton;
+
+            // Only the host/server can start the match
             if (networkManager != null && !networkManager.IsServer)
             {
                 Debug.LogWarning("LobbyUI: Only the host can start the match.");
                 return;
             }
 
-            if (GameStateController.Instance != null)
+            if (MatchSessionManager.Instance != null)
             {
-                GameStateController.Instance.StartGame();
+                MatchSessionManager.Instance.StartMatch();
+            }
+            else
+            {
+                Debug.LogError("LobbyUI: MatchSessionManager not found.");
             }
         }
     }

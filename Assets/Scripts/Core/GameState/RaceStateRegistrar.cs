@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Core.GameState
 {
-    public class GameplayStateRegistrar : MonoBehaviour
+    public class RaceStateRegistrar : MonoBehaviour
     {
         private void Start()
         {

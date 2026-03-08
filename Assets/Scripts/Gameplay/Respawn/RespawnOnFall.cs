@@ -1,6 +1,7 @@
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
+using Gameplay.GameModes;
 
 public class RespawnOnFall : MonoBehaviour
 {
@@ -52,6 +53,20 @@ public class RespawnOnFall : MonoBehaviour
         {
             Debug.LogError("RespawnOnFall: Spawn point not assigned.");
             return;
+        }
+
+        Debug.Log("RespawnOnFall triggered");
+
+        // Notify server that this runner has fallen
+        var networkObject = GetComponentInParent<NetworkObject>();
+        if (networkObject != null && NetworkManager.Singleton.IsServer)
+        {
+            var tracker = FindFirstObjectByType<RunnerRoundTracker>();
+
+            if (tracker != null)
+            {
+                tracker.NotifyRunnerFellServerRpc(networkObject.OwnerClientId);
+            }
         }
 
         if (characterController != null)
