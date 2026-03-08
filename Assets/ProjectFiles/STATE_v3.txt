@@ -1,0 +1,563 @@
+STATE_v3
+
+Current project state
+
+
+CORE ARCHITECTURE
+
+GameState system implemented
+
+- Persistent Bootstrap scene
+- GameStateController singleton (DontDestroyOnLoad)
+- Centralized scene transitions
+- SceneNames constants (no magic strings)
+- Scene self-registration (MainMenu, Lobby, Gameplay)
+- UI communicates only with GameStateController
+
+Scene flow
+
+Boot -> MainMenu -> Lobby -> LoadingGame -> Gameplay
+
+Scene loading mode
+
+- Single scene loading
+- Multiplayer scene transitions use NetworkManager.SceneManager.LoadScene(..., LoadSceneMode.Single)
+- Clients do not manually load scenes during active network sessions
+- Host/server is authoritative for scene transitions
+
+
+
+MULTIPLAYER ARCHITECTURE
+
+Networking stack implemented with
+
+- Netcode for GameObjects
+- Unity Transport
+- Unity Relay
+- Unity Lobby
+- Unity Authentication
+
+Network topology
+
+Client -> Relay -> Host
+
+- Host acts as server (Client-Server model)
+
+
+
+NETWORK INITIALIZATION
+
+Networking services initialized by
+
+UGSBootstrap
+
+Responsibilities
+
+- Initialize Unity Gaming Services
+- Perform anonymous authentication
+- Ensure services are ready before lobby operations
+
+Services initialized
+
+- Authentication
+- Lobby
+- Relay
+
+
+
+LOBBY SYSTEM
+
+Lobby creation and joining handled by
+
+RelayLobbyNetwork
+
+Host flow
+
+HostAsync()
+- Create Relay allocation
+- Generate Relay Join Code
+- Generate short 6-digit Join Code
+- Create Lobby
+- Store Join Code in Lobby data
+- Configure Unity Transport
+- StartHost()
+
+Client flow
+
+JoinAsync(lobbyId)
+- Join Lobby
+- Read Relay Join Code from Lobby data
+- Join Relay allocation
+- Configure Unity Transport
+- StartClient()
+
+Client alternate flow
+
+JoinByShortCodeAsync(shortCode)
+- Query public lobbies
+- Match short join code
+- Join matching lobby
+- Continue normal client flow
+
+Lobby data
+
+- relayJoinCode
+- shortJoinCode
+
+Lobby capacity
+
+- Up to 8 players
+
+
+
+UI NETWORKING LAYER
+
+Main menu networking UI handled by
+
+LobbyNetworkDebugUI
+
+Responsibilities
+
+- Host button -> HostAsync()
+- Join button -> JoinAsync(lobbyId) or JoinByShortCodeAsync(shortCode)
+
+After successful connection
+
+GameStateController.SetState(GameStateType.Lobby)
+
+Flow
+
+MainMenu -> Host / Join -> Lobby
+
+
+
+LOBBY SCENE
+
+Lobby scene contains
+
+- Lobby UI
+- Start Match button
+- Lobby join code display
+- Team slot UI
+
+Lobby join code display handled by
+
+LobbyLobbyIdDisplay
+
+Displays
+
+- Join Code: <6-digit code>
+- Falls back to Lobby ID if short code unavailable
+
+Lobby start button handled by
+
+LobbyUI
+
+Responsibilities
+
+- Only host/server can start match
+- Calls GameStateController.StartGame()
+
+
+
+LOBBY SLOT SYSTEM
+
+Lobby slot management handled by
+
+LobbySlotManager
+
+Responsibilities
+
+- Maintain player-to-slot assignments
+- Keep team assignments stable for the session
+- Synchronize slot UI across host and clients
+- Provide team lookup for gameplay spawn/role assignment
+
+Slot layout
+
+- Team 1 = slots 0-3
+- Team 2 = slots 4-7
+
+Assignment order
+
+- 0, 4, 1, 5, 2, 6, 3, 7
+
+Meaning
+
+- Players are assigned alternately between Team 1 and Team 2
+- Team assignments persist and do not reshuffle during refresh
+
+Networking behavior
+
+- LobbySlotManager is a NetworkBehaviour
+- Persistent across scenes via DontDestroyOnLoad
+- Spawned on server and synchronized to clients
+- Clients request slot refresh after network spawn
+- Server is authoritative for slot assignment
+
+Lobby slot UI elements handled by
+
+LobbySlot
+
+Displays
+
+- Empty / occupied state
+- Player name
+- Host indicator
+
+
+
+NETWORKMANAGER SETUP
+
+NetworkManager located in
+
+Bootstrap scene
+
+Components
+
+- NetworkManager
+- UnityTransport
+- RelayLobbyNetwork
+- LobbySlotManagerSpawner
+
+Configuration
+
+- Network topology: ClientServer
+- Transport: UnityTransport
+- Enable Scene Management = true
+
+Default Player Prefab
+
+- None
+
+Automatic player spawning is intentionally disabled.
+
+Reason
+
+- Players are spawned manually by NetworkGameManager after Gameplay scene load completes
+
+
+
+NETWORK PLAYER PREFAB
+
+Prefab
+
+Prefabs/Network/NetworkPlayer
+
+Hierarchy
+
+- NetworkPlayer (root NetworkObject)
+  - PlayerCapsule
+  - CameraRoot
+    - MainCamera
+
+Important prefab setup
+
+- PlayerCapsule local position = (0, 1, 0)
+- CharacterController remains on PlayerCapsule
+- Network root is the authoritative object for spawn/teleport
+
+Components
+
+Root object
+- NetworkObject
+- NetworkTransform
+- NetworkPlayerOwnership
+- PlayerRole
+
+Child object
+- CharacterController
+- PlayerMovement / Starter Assets controller
+- KnockbackReceiver
+- KnockbackMovementAdapter
+- RespawnOnFall
+- TargetedPushAbility
+
+Authority model
+
+- Owner-authoritative movement
+
+Ownership handling
+
+Handled by
+
+NetworkPlayerOwnership
+
+Responsibilities
+
+If IsOwner
+- Enable Camera
+- Enable AudioListener
+- Enable PlayerInput
+- Update camera culling mask for Runner and Sabotager layers
+
+If not owner
+- Disable Camera
+- Disable AudioListener
+- Disable PlayerInput
+
+Additional behavior
+
+- Owner spawn position is synchronized with ClientRpc because owner clients do not receive initial transform state from NetworkTransform the same way as remote observers
+
+
+
+PLAYER CONTROLLER ARCHITECTURE
+
+Movement system uses
+
+- CharacterController
+- Starter Assets FirstPersonController
+- Cinemachine / camera hierarchy
+- New Input System
+
+Both player roles share the same base controller.
+
+Important rule
+
+- Spawn and respawn operate on the network root, not the PlayerCapsule child
+
+
+
+GAMEPLAY ROLES
+
+Two player roles
+
+- Runner
+- Sabotager
+
+Gameplay design
+
+Runners
+- Navigate elevated obstacle course
+- Respawn on fall
+
+Sabotagers
+- Stay on ground
+- Use abilities to disrupt runners
+
+Handled by
+
+PlayerRole
+
+Responsibilities
+
+- Store current role in NetworkVariable<PlayerRoleType>
+- Enable/disable role-specific components
+- Apply Runner / Sabotager layer to full player hierarchy
+- Refresh owner camera visibility after role changes
+
+Role behavior
+
+Runner
+- RespawnOnFall enabled
+- TargetedPushAbility disabled
+- Layer set to Runner
+
+Sabotager
+- RespawnOnFall disabled
+- TargetedPushAbility enabled
+- Layer set to Sabotager
+
+Role assignment authority
+
+- Server only
+- Set via PlayerRole.SetRoleServer(...)
+
+
+
+GAMEPLAY SPAWN SYSTEM
+
+Gameplay bootstrap handled by
+
+NetworkGameManager
+
+Responsibilities
+
+- Wait for Netcode scene load completion event
+- Spawn one NetworkPlayer per connected client
+- Assign role based on LobbySlotManager team mapping
+- Choose spawn point by role
+- Assign respawn spawn point for runners
+- Synchronize owner spawn position
+
+Critical behavior
+
+- Players are not spawned on a one-frame delay anymore
+- Server waits for NetworkManager.SceneManager.OnLoadEventCompleted
+- Only clients confirmed as finished loading Gameplay are spawned
+
+Role mapping
+
+- Team 1 -> Runner
+- Team 2 -> Sabotager
+
+Spawn groups
+
+- RunnerSpawnPoints[]
+- SabotagerSpawnPoints[]
+
+Result
+
+- Host and client both receive their NetworkPlayer correctly
+- Client-owned camera is present after Gameplay load
+- No client-side missing player/camera race condition remains
+
+
+
+KNOCKBACK SYSTEM
+
+Sabotager ability
+
+TargetedPushAbility
+
+Mechanics
+
+- Targeted push / knockback interaction against runners
+
+Runner receives knockback via
+
+- KnockbackReceiver
+- KnockbackMovementAdapter
+
+Knockback integrates with CharacterController movement.
+
+
+
+RESPAWN SYSTEM
+
+Runner fall detection handled by
+
+RespawnOnFall
+
+Mechanics
+
+- Checks root player world Y against killY
+- On fall, teleports network root to assigned spawn point
+- Restores PlayerCapsule local offset after teleport
+- CharacterController temporarily disabled during teleport
+
+Authority
+
+- Only owning client performs respawn check for its own player
+
+Spawn point assignment
+
+- Set by NetworkGameManager at spawn time for runners
+
+
+
+ENVIRONMENT
+
+Obstacle course implemented using
+
+- Elevated platforms
+- Modular obstacle pieces
+- Ground area for sabotagers
+
+Respawn
+
+- Assigned from runner spawn point
+
+Checkpoints
+
+- Not implemented
+
+
+
+CURRENT MULTIPLAYER STATE
+
+Working systems
+
+- Unity Gaming Services initialization
+- Authentication
+- Lobby creation
+- Lobby joining by Lobby ID
+- Lobby joining by 6-digit short code
+- Relay allocation
+- Relay connection
+- Host + Client session
+- MainMenu -> Lobby flow
+- Lobby join code display
+- Stable team slot assignment
+- Host-only match start
+- Gameplay network scene transition
+- Network player spawning
+- Team-based role assignment
+- Owner camera/input activation
+- Runner respawn on fall
+- Sabotager push ability
+- Host sees client correctly
+- Client sees host correctly
+- Host and client both receive proper Gameplay player object and camera
+
+Fixed in this state
+
+- Client scene transition authority bug
+- Team reshuffling bug in LobbySlotManager
+- Runtime PlayerCapsule offset hack removed
+- Respawn now teleports network root instead of child
+- Player spawning now waits for scene load completion instead of one-frame delay
+- Client no longer misses owned player/camera due to spawn race condition
+
+Known remaining cleanup items
+
+- Double AudioListener warning may still appear transiently during scene/player initialization and should be validated separately
+- LobbySlotManager may still log slot lookup warnings if queried outside Lobby scene and can be cleaned up later if needed
+- Player display names currently fall back to client ID / auth ID fragment rather than a custom player-name system
+
+Not implemented yet
+
+- Round timer / round loop
+- Team switching between rounds
+- Score system
+- Win/loss conditions
+- Checkpoints
+- Match restart flow
+- Return-to-lobby flow after gameplay
+- Disconnect/rejoin recovery mid-match
+
+
+
+AUTHORITATIVE RULES
+
+Scene authority
+
+- Only host/server triggers scene transitions in multiplayer
+- Clients wait for network scene events
+
+Spawn authority
+
+- Only server spawns player objects
+
+Role authority
+
+- Only server assigns roles
+
+Movement authority
+
+- Owner authoritative
+
+Lobby team authority
+
+- Server authoritative via LobbySlotManager mapping
+
+
+
+NEXT RECOMMENDED SYSTEMS
+
+1. Round system
+- Start round
+- End round
+- Swap roles / teams
+- Reset player positions
+
+2. Score system
+- Track runner success / sabotager success
+- Persist scores across rounds
+
+3. Match flow completion
+- Gameplay -> results -> lobby or next round
+
+4. Player naming / identity polish
+- Replace fallback Player <clientId> labels with actual player identity data
