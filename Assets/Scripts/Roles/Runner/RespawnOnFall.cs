@@ -1,114 +1,87 @@
+using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 public class RespawnOnFall : MonoBehaviour
 {
-    [Header("Spawn Point (Optional - will be found automatically if not assigned)")]
-    public Transform spawnPoint;
-    public float killY = -10f;
+    [Header("Spawn Point")]
+    [SerializeField] private Transform spawnPoint;
 
-    private Rigidbody rb;
-    private CharacterController cc;
-    private Transform cachedSpawnPoint;
+    [SerializeField] private float killY = -10f;
+
+    private CharacterController characterController;
+
+    private NetworkObject rootNetworkObject;
+    private NetworkTransform rootNetworkTransform;
+
+    private Transform rootTransform;
+
+    private Vector3 capsuleLocalPosition;
+    private Quaternion capsuleLocalRotation;
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        cc = GetComponent<CharacterController>();
-    }
+        characterController = GetComponent<CharacterController>();
 
-    private void Start()
-    {
-        // If spawn point not assigned, find it dynamically
-        if (spawnPoint == null)
-        {
-            FindSpawnPoint();
-        }
-        else
-        {
-            cachedSpawnPoint = spawnPoint;
-        }
-    }
+        rootNetworkObject = GetComponentInParent<NetworkObject>();
 
-    private void FindSpawnPoint()
-    {
-        // Try to find spawn point based on player's initial position
-        // This works because NetworkGameManager spawns players at spawn points
-        Vector3 currentPos = transform.position;
-        
-        // Find all spawn points in the scene
-        Transform[] allSpawnPoints = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        Transform closestSpawnPoint = null;
-        float closestDistance = float.MaxValue;
-        
-        // Look for spawn points by name pattern (RunnerSpawn_* or SabotagerSpawn_*)
-        foreach (Transform t in allSpawnPoints)
+        if (rootNetworkObject != null)
         {
-            if (t.name.Contains("Spawn_") && t.parent != null)
-            {
-                // Check if it's a spawn point (has a parent named RunnerSpawns or SabotagerSpawns)
-                string parentName = t.parent.name;
-                if (parentName == "RunnerSpawns" || parentName == "SabotagerSpawns")
-                {
-                    float distance = Vector3.Distance(currentPos, t.position);
-                    if (distance < closestDistance)
-                    {
-                        closestDistance = distance;
-                        closestSpawnPoint = t;
-                    }
-                }
-            }
+            rootNetworkTransform = rootNetworkObject.GetComponent<NetworkTransform>();
+            rootTransform = rootNetworkObject.transform;
         }
-        
-        if (closestSpawnPoint != null)
-        {
-            spawnPoint = closestSpawnPoint;
-            cachedSpawnPoint = closestSpawnPoint;
-        }
+
+        capsuleLocalPosition = transform.localPosition;
+        capsuleLocalRotation = transform.localRotation;
     }
 
     private void Update()
     {
-        if (transform.position.y < killY)
+        if (rootNetworkObject != null && !rootNetworkObject.IsOwner)
+            return;
+
+        if (rootTransform.position.y < killY)
+        {
             Respawn();
+        }
     }
 
     private void Respawn()
     {
-        Transform respawnPoint = spawnPoint != null ? spawnPoint : cachedSpawnPoint;
-        
-        if (respawnPoint == null)
+        if (spawnPoint == null)
         {
-            // Last resort: try to find it again
-            FindSpawnPoint();
-            respawnPoint = spawnPoint != null ? spawnPoint : cachedSpawnPoint;
-        }
-        
-        if (respawnPoint == null)
-        {
-            Debug.LogError("RespawnOnFall: No spawn point available! Respawn failed.");
+            Debug.LogError("RespawnOnFall: Spawn point not assigned.");
             return;
         }
 
-        if (cc != null) cc.enabled = false;
+        if (characterController != null)
+            characterController.enabled = false;
 
-        transform.position = respawnPoint.position;
-        transform.rotation = respawnPoint.rotation;
-
-        if (rb != null)
+        if (rootNetworkTransform != null && rootNetworkObject.IsOwner)
         {
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            rootNetworkTransform.Teleport(
+                spawnPoint.position,
+                spawnPoint.rotation,
+                rootTransform.localScale
+            );
+        }
+        else
+        {
+            rootTransform.SetPositionAndRotation(
+                spawnPoint.position,
+                spawnPoint.rotation
+            );
         }
 
-        if (cc != null) cc.enabled = true;
+        transform.localPosition = capsuleLocalPosition;
+        transform.localRotation = capsuleLocalRotation;
+
+        if (characterController != null)
+            characterController.enabled = true;
     }
-    
-    /// <summary>
-    /// Set the spawn point programmatically (called by NetworkGameManager when player spawns)
-    /// </summary>
+
     public void SetSpawnPoint(Transform newSpawnPoint)
     {
         spawnPoint = newSpawnPoint;
-        cachedSpawnPoint = newSpawnPoint;
     }
 }

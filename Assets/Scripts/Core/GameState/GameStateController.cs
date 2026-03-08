@@ -54,6 +54,14 @@ namespace Core.GameState
 
         private void HandleStateChanged(GameStateType state)
         {
+            var networkManager = Unity.Netcode.NetworkManager.Singleton;
+
+            if (networkManager != null && networkManager.IsClient && !networkManager.IsServer)
+            {
+                // Clients never control scene transitions in multiplayer.
+                return;
+            }
+
             switch (state)
             {
                 case GameStateType.Boot:
